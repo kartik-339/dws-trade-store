@@ -1,0 +1,15 @@
+@startuml
+actor Client
+participant "Trade Store API" as API
+database "SQL database" as DB
+
+Client -> API: POST /trades
+API -> DB: Atomic upsert if incoming version >= stored version
+alt Incoming version is lower
+    DB --> API: No row updated
+    API --> Client: 409 Conflict
+else Version is equal or higher
+    DB --> API: Trade stored
+    API --> Client: 201 Created / 200 OK
+end
+@enduml
