@@ -102,6 +102,17 @@ The API persists expired flags periodically (once per minute by default). A read
 
 GitHub Actions runs the automated test suite and scans dependencies with Trivy on pushes and pull requests. The scan fails the build if it finds a critical vulnerability.
 
+## Deployment
+
+The Render Blueprint in `render.yaml` defines the FastAPI web service and its PostgreSQL database. The GitHub Actions deploy job triggers a Render deploy hook only after tests and the vulnerability scan pass on a push to `main`; pull requests do not deploy. Deployment is disabled until configured:
+
+1. In Render, create a Blueprint Instance for this repository and wait for the service and database to be created. The web service has automatic deploys disabled so deployments remain gated by CI.
+2. In the Render service settings, create a deploy hook and copy its URL.
+3. In the GitHub repository, open **Settings > Secrets and variables > Actions**. Add the repository secret `RENDER_DEPLOY_HOOK_URL` with the hook URL and the repository variable `RENDER_DEPLOY_ENABLED` with value `true`.
+4. Push a change to `main`. The deploy job will run after both CI jobs succeed. The service URL and deployment status are available in Render.
+
+The included free Render plans are intended for a demo; review Render's current availability, limits, and database retention before relying on them for production data.
+
 ## Diagrams
 
 The trade-ingestion sequence diagram is maintained as a standalone PlantUML source file: [docs/trade-store-sequence.puml](docs/trade-store-sequence.puml). Open that file in VS Code and use **PlantUML: Preview Current Diagram** to render it.

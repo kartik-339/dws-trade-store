@@ -18,6 +18,21 @@ def session_factory():
     engine.dispose()
 
 
+@pytest.mark.parametrize(
+    "database_url",
+    [
+        "postgres://trade_user:secret@localhost/trades",
+        "postgresql://trade_user:secret@localhost/trades",
+    ],
+)
+def test_postgres_database_urls_use_psycopg_driver(database_url):
+    engine, _ = create_database(database_url)
+    try:
+        assert engine.url.drivername == "postgresql+psycopg"
+    finally:
+        engine.dispose()
+
+
 def test_upsert_rejects_lower_version_and_preserves_current_record(session_factory):
     with session_factory() as session:
         upsert_trade(
